@@ -1028,7 +1028,7 @@ class CommandSender:
         # user's shell profile, so a bare `codex` can be missing from PATH even
         # though it works in an interactive terminal. Resolve it through a
         # login shell and replace that shell with the Codex TUI.
-        'codex': ['bash', '-lic', 'PATH=/usr/local/bin:$PATH exec codex --yolo'],
+        'codex': ['bash', '-lic', 'exec codex --yolo'],
         'hermes': ['/usr/local/bin/hermes', 'chat'],
     }
 
