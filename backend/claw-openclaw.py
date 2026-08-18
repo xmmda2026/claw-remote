@@ -773,10 +773,10 @@ def discover_claude_sockets():
     # Derive socket filename (e.g. claude-code.sock, codex-code.sock) from TMUX_SOCKET
     socket_name = Path(TMUX_SOCKET).name
     sockets = []
-    default = Path('/tmp/clawdbot-tmux-sockets') / socket_name
+    default = Path('/root/clawdbot-tmux-sockets') / socket_name
     if default.exists():
         sockets.append(str(default))
-    for p in sorted(Path('/tmp').glob(f'claude-*/clawdbot-tmux-sockets/{socket_name}')):
+    for p in sorted(Path('/root').glob(f'claude-*/clawdbot-tmux-sockets/{socket_name}')):
         if str(p) not in sockets:
             sockets.append(str(p))
     return sockets
@@ -1028,7 +1028,7 @@ class CommandSender:
         # user's shell profile, so a bare `codex` can be missing from PATH even
         # though it works in an interactive terminal. Resolve it through a
         # login shell and replace that shell with the Codex TUI.
-        'codex': ['bash', '-lic', 'exec codex --dangerously-bypass-approvals-and-sandbox'],
+        'codex': ['bash', '-lic', 'PATH=/usr/local/bin:$PATH exec codex --yolo'],
         'hermes': ['/usr/local/bin/hermes', 'chat'],
     }
 
@@ -1135,25 +1135,33 @@ class CommandSender:
         return CommandSender._pane_process_tree_contains(session_name, target, 'claude')
 
     @staticmethod
-    def _wait_for_session_process(session_name, command, timeout=6.0):
+    def _wait_for_session_process(session_name, command, timeout=6.0, stable_for=1.0):
         """Verify that the requested interactive CLI really owns the pane."""
         deadline = time.monotonic() + timeout
+        stable_since = None
         while time.monotonic() < deadline:
             if not CommandSender._session_exists(session_name):
                 return False
             target_command = CommandSender._get_target_command(session_name)
+            found = False
             if command == 'codex':
-                if CommandSender._is_codex_pane(session_name, session_name):
-                    return True
+                found = CommandSender._is_codex_pane(session_name, session_name)
             elif command in ('claude', 'glm') and (
                 target_command == 'claude'
                 or CommandSender._is_claude_pane(session_name, session_name)
             ):
-                return True
+                found = True
             elif command == 'hermes' and target_command == 'hermes':
-                return True
+                found = True
             elif command == 'bash' and target_command in {'bash', 'sh', 'zsh'}:
-                return True
+                found = True
+            if found:
+                if stable_since is None:
+                    stable_since = time.monotonic()
+                elif time.monotonic() - stable_since >= stable_for:
+                    return True
+            else:
+                stable_since = None
             time.sleep(0.25)
         return False
 
@@ -1308,7 +1316,7 @@ class CommandSender:
         if TMUX_SOCKET and 'codex-code.sock' in TMUX_SOCKET:
             return {'codex', 'hermes'}
         if TMUX_SOCKET and 'default-code.sock' in TMUX_SOCKET:
-            return {'glm', 'claude', 'codex'}
+            return {'bash', 'glm', 'claude', 'codex'}
         return {'glm', 'claude', 'codex'}
 
     @staticmethod
@@ -4469,9 +4477,9 @@ class DashboardHandler(http.server.SimpleHTTPRequestHandler):
             const socket = s && s.dispatch && s.dispatch.tmux_socket ? s.dispatch.tmux_socket : '';
             if (socket) return socket;
             const mode = getCurrentMode();
-            if (mode === 'claude') return '/tmp/clawdbot-tmux-sockets/claude-code.sock';
-            if (mode === 'codex') return '/tmp/clawdbot-tmux-sockets/codex-code.sock';
-            if (mode === 'default') return '/tmp/clawdbot-tmux-sockets/default-code.sock';
+            if (mode === 'claude') return '/root/clawdbot-tmux-sockets/claude-code.sock';
+            if (mode === 'codex') return '/root/clawdbot-tmux-sockets/codex-code.sock';
+            if (mode === 'default') return '/root/clawdbot-tmux-sockets/default-code.sock';
             return '';
         }}
 
@@ -4650,6 +4658,7 @@ def main():
         socket_path = Path(args.tmux_socket).expanduser()
         if not socket_path.is_absolute():
             parser.error('--tmux-socket must be an absolute path')
+        socket_path.parent.mkdir(parents=True, exist_ok=True)
         TMUX_SOCKET = str(socket_path)
 
     config = DashboardConfig()

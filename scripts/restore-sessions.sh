@@ -13,7 +13,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SKILL_DIR="$(dirname "$SCRIPT_DIR")"
 REGISTRY="${SKILL_DIR}/data/session-registry.json"
-DEFAULT_SOCKET="/tmp/clawdbot-tmux-sockets/default-code.sock"
+DEFAULT_SOCKET="/root/clawdbot-tmux-sockets/default-code.sock"
 
 # Colors
 RED='\033[0;31m'

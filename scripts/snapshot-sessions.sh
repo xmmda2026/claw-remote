@@ -8,7 +8,7 @@ SKILL_DIR="$(dirname "$SCRIPT_DIR")"
 SNAPSHOT_FILE="${SKILL_DIR}/data/session-snapshot.json"
 REGISTRY="${SKILL_DIR}/data/session-registry.json"
 LOG_DIR="/root/.openclaw/logs"
-SOCKET_DIR="/tmp/clawdbot-tmux-sockets"
+SOCKET_DIR="/root/clawdbot-tmux-sockets"
 
 mkdir -p "$(dirname "$SNAPSHOT_FILE")" "$LOG_DIR"
 

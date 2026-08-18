@@ -3,19 +3,7 @@ services:
     image: caddy:2-alpine
     container_name: claw-portal
     restart: unless-stopped
-    networks:
-      - traefik-public
+    network_mode: host
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ./index.html:/srv/index.html:ro
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=traefik-public
-      - traefik.http.routers.claw-portal.rule=Host(`your-domain.com`) || Host(`www.your-domain.com`)
-      - traefik.http.routers.claw-portal.entrypoints=web
-      - traefik.http.routers.claw-portal.priority=1000
-      - traefik.http.services.claw-portal.loadbalancer.server.port=8080
-
-networks:
-  traefik-public:
-    external: true

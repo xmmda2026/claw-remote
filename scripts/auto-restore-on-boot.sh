@@ -6,7 +6,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SKILL_DIR="$(dirname "$SCRIPT_DIR")"
 SNAPSHOT_FILE="${SKILL_DIR}/data/session-snapshot.json"
-SOCKET_DIR="/tmp/clawdbot-tmux-sockets"
+SOCKET_DIR="/root/clawdbot-tmux-sockets"
 RESTORE_SCRIPT="${SCRIPT_DIR}/restore-sessions.sh"
 
 GREEN='\033[0;32m'
