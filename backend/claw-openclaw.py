@@ -1532,7 +1532,7 @@ class CommandSender:
             # Inject env vars at creation time via -e so the initial process inherits them
             extra_env = [f'CLAW_REMOTE_TMUX_SESSION={session_name}', 'CLAW_REMOTE_SOURCE=claw-remote']
             result = subprocess.run(
-                tmux_cmd('new-session', '-d', '-s', session_name, '-c', str(cwd_path),
+                tmux_cmd('new-session', '-d', '-x', '200', '-s', session_name, '-c', str(cwd_path),
                          *[arg for kv in extra_env for arg in ('-e', kv)],
                          *cmd),
                 capture_output=True,
