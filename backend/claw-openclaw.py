@@ -1647,7 +1647,11 @@ class DataCollector:
     @staticmethod
     def _load_dispatch_meta(session_name):
         candidates = [Path('/root/clawd/data/claude-code-results/sessions') / session_name / 'task-meta.json']
-        codex_session_roots = [Path('/root/.openclaw/skills/codex-agent/data/sessions')]
+        codex_session_roots = [
+            Path('/root/.openclaw/skills/codex-dispatch/data/sessions'),
+            Path('/root/.openclaw/skills/codex-agent/data/sessions'),
+        ]
+        codex_session_roots.extend(sorted(Path('/root/.openclaw').glob('workspace*/skills/codex-dispatch/data/sessions')))
         codex_session_roots.extend(sorted(Path('/root/.openclaw').glob('workspace*/skills/codex-agent/data/sessions')))
         candidates.extend(path / session_name / 'task-meta.json' for path in codex_session_roots)
         for path in candidates:
